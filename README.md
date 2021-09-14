@@ -118,7 +118,7 @@ Excel-Import mit Delimiter '&'.
 <br/>
 <br/>
 
-# Teil 4 | PDFs auslesen
+# TEIL 4 | PDFs auslesen
 ```python
 import requests
 import csv 
@@ -194,7 +194,7 @@ Excel-Import mit Delimiter '&'. PDF-Texte in CSV unvollstaendig. Eine Vermutung 
 
 <br/>
 
-# Teil 5 | Keyword Extraction, PDF und HTML
+# TEIL 5 | Keyword Extraction, PDF und HTML
 
 YAKE! im Terminal mit pip installieren:
 pip install git+https://github.com/LIAAD/yake
@@ -269,7 +269,7 @@ h3 = h1 + h2
 ```
 <br/>
 
-# Teil 6 | Keywords aufsummieren / squishen und Top 30 behalten
+# TEIL 6 | Keywords aufsummieren / squishen und Top 30 behalten
 
 Aufbauend könnte eine *"Distance"* implementiert werden, um die Ergebnisse der Counts zu verbessern und stark ähnliche Worte als ein Wort zu zählen.
 Auf diese Art ließe sich auch die Bereinigung der Ergebnisse durch die Blacklist noch verbessern.
@@ -309,7 +309,7 @@ print(h11[:30])
 ```
 <br/>
 
-# Teil 7 | Eine Zusammenfassung erstellen mit DeepAI (basierend auf GPT-2)
+# TEIL 7 | Eine Zusammenfassung erstellen mit DeepAI (basierend auf GPT-2)
 Die HTML-Texte können direkt als String an DeepAI gesendet werden.
 ```python
 print("Zusammenfassungen der HTML-Texte:")
@@ -337,7 +337,7 @@ np.savetxt('HTMLtexts_summary_link_pubdate_IQWIG2_delimiterUND.csv', [p for p in
 Excel-Import mit Delimiter '&'.
 <br/>
 
-# Teil 8 | Resultate zu PDF- und HTML-Texten chronologisch ordnen
+# TEIL 8 | Resultate zu PDF- und HTML-Texten chronologisch ordnen
 *Datetime* im Terminal mit pip installieren:\
 pip install datetime
 ```python
@@ -391,6 +391,6 @@ Excel-Import mit Delimiter '&'.
 <br/>
 <br/>
 
-# Ende
+# ENDE
 ### In der UI werden PDF- und HTML-Inhalte in einen Kontext gebracht.
 <br/>
