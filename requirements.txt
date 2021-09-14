@@ -1,0 +1,7 @@
+requests
+numpy
+beautifulsoup4
+python-csv 
+pdfminer
+yake
+datetime
