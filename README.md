@@ -37,7 +37,7 @@ def webCR1(page,WebUrl):
         code = requests.get(url)
         plain = code.text
         s = json.loads(plain)
-        print(len(s["results"]))
+        print("Zahl der HTML-Ergebnisse:", len(s["results"]))
         for link in s["results"]: 
             if link["link"][0] != "/":
                 print(link["link"])
@@ -56,7 +56,7 @@ HTMLlink = ['HTMLlink'] + l
 pubdate1 = ['Pub_Datum'] + r
 HTMLtext = ['HTML-Text'] + x
 
-np.savetxt('HTMLtexts_Liste_IQWIG_link_nodate6.csv', [p for p in zip(source1, HTMLlink, pubdate1, x)], delimiter='&', fmt='%s')
+np.savetxt('HTMLtexts_Liste_IQWIG_link_nodate6.csv', [p for p in zip(source1, HTMLlink, pubdate1, HTMLtext)], delimiter='&', fmt='%s')
 ```
 Excel-Import mit Delimiter '&'.
 <br/>
@@ -185,9 +185,9 @@ e = extract_text()
 source = ['Source_name'] + list(np.full(len(g), 'IQWIG'))
 PDFlink = ['PDFlink'] + g
 pubdate = ['Pub_Datum'] + b
-pdftext = ['PDFtext'] + e
+PDFtext = ['PDFtext'] + e
 
-np.savetxt('PDFtexts_Liste_IQWIG_link_date6.csv', [p for p in zip(source, PDFlink, pubdate, pdftext)], delimiter='&', fmt='%s')
+np.savetxt('PDFtexts_Liste_IQWIG_link_date6.csv', [p for p in zip(source, PDFlink, pubdate, PDFtext)], delimiter='&', fmt='%s')
 ```
 Excel-Import mit Delimiter '&'. PDF-Texte in CSV unvollstaendig. Eine Vermutung ist, dass Excel die Texte in der Darstellung aus Performane-Gründen kürzt.
 
@@ -263,6 +263,7 @@ Für den Output, den *YAKE!* zurückgibt, gilt: *"The lower the score, the more 
 <br/>
 
 ## Abschluss Teil 5 | Listen bereinigter Keywords fusionieren
+Das dient der Vorbereitung von Schritt 6. 
 ```python
 h3 = h1 + h2
 ```
@@ -277,7 +278,7 @@ Geeignet scheint dafür das Package *jellyfish*.
 ```python
 print("Textübergreifend wichtigste Keywords im IQWIG-Datenset:")
 
-# Zaehlen
+# Zählen
 h4 = []
 for kwRank in h3:
     o = h3.count(kwRank)
@@ -309,7 +310,7 @@ print(h11[:30])
 <br/>
 
 # Teil 7 | Eine Zusammenfassung erstellen mit DeepAI (basierend auf GPT-2)
-Directly sending a text string:
+Die HTML-Texte können direkt als String an DeepAI gesendet werden.
 ```python
 print("Zusammenfassungen der HTML-Texte:")
 m = []
@@ -381,10 +382,9 @@ sb = sorted(OverallTupelPDF, key = unpackPDFtuple, reverse = False)
 print(sb)
 # Problem: Pro Ausgangstext steht in der CSV-Liste nur ein einziges YAKE!-Keyword
 ```
-## Zwischenteil 8.2 | Ergebnisse als CSV speichern:
+## Endteil 8.2 | Sortierte Ergebnisse als CSV speichern:
 ```python
 np.savetxt('PDF_allAtributes_DateSorted_IQWIG.csv', sb, delimiter='&', fmt='%s')
-
 np.savetxt('HTML_allAtributes_DateSorted_IQWIG.csv', sr, delimiter='&', fmt='%s')
 ```
 Excel-Import mit Delimiter '&'.
