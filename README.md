@@ -1,4 +1,4 @@
-# *Keyword Extraction, Summary, and Sorting* 
+# *KESS - Keyword Extraction, Summary, and Sorting* 
 
 Teil 1 und 2 sind vertauscht, da in Teil 1 eine Funktion ausgeführt wird, die in Teil 2 definiert wurde. Die Reihenfolge wurde so gewählt, wie es der Nachvollziehbarkeit am nützlichsten ist. 
 
@@ -7,17 +7,16 @@ Teil 1 und 2 sind vertauscht, da in Teil 1 eine Funktion ausgeführt wird, die i
 import requests
 import numpy as np
 from bs4 import BeautifulSoup
-def webCR2(page,WebUrl):
+def webCR2(WebUrl):
     y = ""
-    if(page>0):
-        url = WebUrl
-        code = requests.get(url)
-        plain = code.text
-        s = BeautifulSoup(plain, "html.parser")
-        for text in s.findAll("p", {"class":"ta--left"}):
-            print (text.text)
-            y = y + " " + text.text.replace('&', 'UND')
-        return y
+    url = WebUrl
+    code = requests.get(url)
+    plain = code.text
+    s = BeautifulSoup(plain, "html.parser")
+    for text in s.findAll("p", {"class":"ta--left"}):
+        print (text.text)
+        y = y + " " + text.text.replace('&', 'UND')
+    return y
 ```
 <br/>
 
@@ -28,25 +27,24 @@ Die Elemente werden nach HTML-Text (y), dem Link zur Unterseite ("link") und dem
 ```python
 import requests
 import json
-def webCR1(page,WebUrl):
+def webCR1(WebUrl):
     x = [] #HTML-Texte
     l = [] #HTML-Links
     r = [] #Pubdates/Daten der Veröffentlichung
-    if(page>0):
-        url = WebUrl
-        code = requests.get(url)
-        plain = code.text
-        s = json.loads(plain)
-        print("Zahl der HTML-Ergebnisse:", len(s["results"]))
-        for link in s["results"]: 
-            if link["link"][0] != "/":
-                print(link["link"])
-                y = webCR2(1,link["link"])
-                x.append(y)
-                l.append(link["link"])
-                r.append(link["pub_date"]) 
+    url = WebUrl
+    code = requests.get(url)
+    plain = code.text
+    s = json.loads(plain)
+    print("Zahl der HTML-Ergebnisse:", len(s["results"]))
+    for link in s["results"]: 
+        if link["link"][0] != "/":
+            print(link["link"])
+            y = webCR2(link["link"])
+            x.append(y)
+            l.append(link["link"])
+            r.append(link["pub_date"]) 
     return x, l, r
-x, l, r = webCR1(1,"https://iqwig-search-api.e-spirit.cloud/v1/prepared_search/IQWIG_PS/execute?query=Prostata&page=1&rows=1000")
+x, l, r = webCR1("https://iqwig-search-api.e-spirit.cloud/v1/prepared_search/IQWIG_PS/execute?query=Prostata&page=1&rows=1000")
 ```
 
 ## Zwischenteil 2.1 | Ergebnisse als CSV speichern
@@ -55,7 +53,6 @@ source1 = ['Source_name'] + list(np.full(len(l), 'IQWIG'))
 HTMLlink = ['HTMLlink'] + l
 pubdate1 = ['Pub_Datum'] + r
 HTMLtext = ['HTML-Text'] + x
-
 np.savetxt('HTMLtexts_Liste_IQWIG_link_nodate6.csv', [p for p in zip(source1, HTMLlink, pubdate1, HTMLtext)], delimiter='&', fmt='%s')
 ```
 Excel-Import mit Delimiter '&'.
@@ -66,41 +63,39 @@ Excel-Import mit Delimiter '&'.
 ```python
 import requests
 import json
-def webCR3(page,WebUrl):
-    if(page>0):
-        url = WebUrl
-        code = requests.get(url)
-        plain = code.text
-        s = json.loads(plain)
-        print(len(s["results"]))
-        for result in s["results"]:
-            print(result["link"])
-        g = []
-        b = []
-        for result in s["results"]:
-            if "doc_file_type" in result:
-                print()
-                print()
-                d = result["doc_file_type"]
-                if "PDF" in d:
+def webCR3(WebUrl):
+    url = WebUrl
+    code = requests.get(url)
+    plain = code.text
+    s = json.loads(plain)
+    print(len(s["results"]))
+    for result in s["results"]:
+        print(result["link"])
+    g = [] #PDF-Links
+    b = [] #Pubdates/Daten der Veröffentlichung der PDFs
+    for result in s["results"]:
+        if "doc_file_type" in result:
+            print()
+            print()
+            d = result["doc_file_type"]
+            if "PDF" in d:
+                print(result["link"])
+                print()  
+                if "pub_date" in result: 
+                    print(result["pub_date"])
+                    b.append(result["pub_date"])
+                else:
+                    print("no date")
+                    b.append("no date")
+                e = 'https://www.iqwig.de' 
+                if result["link"][0] == '/':
+                    f = e + result["link"]
+                    print("Vollstaendiger PDF-Link:")
+                    print(f)
+                else:
                     print(result["link"])
-                    print()  
-                    if "pub_date" in result: 
-                        print(result["pub_date"])
-                        b.append(result["pub_date"])
-                    else:
-                        print("no date")
-                        b.append("no date")
-        
-                    e = 'https://www.iqwig.de' 
-                    if result["link"][0] == '/':
-                        f = e + result["link"]
-                        print("Vollstaendiger PDF-Link:")
-                        print(f)
-                    else:
-                        print(result["link"])
-                        f = result["link"]
-                    g.append(f)
+                    f = result["link"]
+                g.append(f)
 ```
 
 ## Zwischenteil 3.1 | Ergebnisse als CSV speichern
@@ -109,10 +104,11 @@ def webCR3(page,WebUrl):
         source = ['Source_name'] + list(np.full(len(g), 'IQWIG'))
         PDFlink = ['PDFlink'] + g
         pubdate = ['Pub_Datum'] + b
-
-        np.savetxt('PDFlinks_Liste_5_IQWIG_pubdate.csv', [p for p in zip(source, PDFlink, pubdate)], delimiter='&', fmt='%s')
+        np.savetxt('PDFlinks_Liste_5_IQWIG_pubdate.csv', [p for p 
+        in zip(source, PDFlink, pubdate)], delimiter='&', fmt='%s')
+    
     return g, b
-g, b = webCR3(1,"https://iqwig-search-api.e-spirit.cloud/v1/prepared_search/IQWIG_PS/execute?query=Prostata&page=1&rows=1000")
+g, b = webCR3("https://iqwig-search-api.e-spirit.cloud/v1/prepared_search/IQWIG_PS/execute?query=Prostata&page=1&rows=1000")
 ```
 Excel-Import mit Delimiter '&'.
 <br/>
