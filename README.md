@@ -1,8 +1,16 @@
 # *KESS - Keyword Extraction, Summary, and Sorting* 
 
-Vorab einmal folgenden Command im Terminal ausführen: `pip install -r requirements.txt`.
+- Vorab einmal folgenden Command im Terminal ausführen: `pip install -r requirements.txt`.
 
-Setzen der DeepAI-Environment-Variable: `export DEEPAI_KEY="INSERT YOUR KEY FROM DEEPAI.ORG"` für Teil 7.
+- Setzen der DeepAI-Environment-Variable: `export DEEPAI_KEY="INSERT YOUR KEY FROM DEEPAI.ORG"` für Teil 7.
+
+- Für Teil 4 muss ein Ordner `PDFfiles_IQWIG` angelegt werden. Der Ordner muss im selben Ordner liegen wie das Python-Script, das ausgeführt wird.
+
+- Damit alle CSV-Dateien auch richtig angezeigt werden können, definieren wir folgende Funktion:
+```python
+def add_quotations(inp):
+    return '"' + inp.replace('"', '\'') + '"'
+```
 
 Teil 1 und 2 sind vertauscht, da in Teil 1 eine Funktion ausgeführt wird, die in Teil 2 definiert wurde. Die Reihenfolge wurde so gewählt, wie es der Nachvollziehbarkeit am nützlichsten ist. 
 
@@ -57,9 +65,8 @@ source1 = ['Source_name'] + list(np.full(len(l), 'IQWIG'))
 HTMLlink = ['HTMLlink'] + l
 pubdate1 = ['Pub_Datum'] + r
 HTMLtext = ['HTML-Text'] + x
-np.savetxt('HTMLtexts_Liste_IQWIG_link_nodate6.csv', [p for p in zip(source1, HTMLlink, pubdate1, HTMLtext)], delimiter='&', fmt='%s')
+np.savetxt('HTMLtexts_Liste_IQWIG_link_nodate.csv', [p for p in zip(source1, HTMLlink, pubdate1, map(add_quotations, HTMLtext))], delimiter=',', fmt='%s', encoding="utf-8")
 ```
-Excel-Import mit Delimiter '&'.
 <br/>
 <br/>
 
@@ -108,13 +115,12 @@ def webCR3(WebUrl):
         source = ['Source_name'] + list(np.full(len(g), 'IQWIG'))
         PDFlink = ['PDFlink'] + g
         pubdate = ['Pub_Datum'] + b
-        np.savetxt('PDFlinks_Liste_5_IQWIG_pubdate.csv', [p for p 
-        in zip(source, PDFlink, pubdate)], delimiter='&', fmt='%s')
+        np.savetxt('PDFlinks_IQWIG_pubdate.csv', [p for p 
+        in zip(source, PDFlink, pubdate)], delimiter=',', fmt='%s', encoding="utf-8")
     
     return g, b
 g, b = webCR3("https://iqwig-search-api.e-spirit.cloud/v1/prepared_search/IQWIG_PS/execute?query=Prostata&page=1&rows=1000")
 ```
-Excel-Import mit Delimiter '&'.
 <br/>
 <br/>
 
@@ -187,9 +193,8 @@ PDFlink = ['PDFlink'] + g
 pubdate = ['Pub_Datum'] + b
 PDFtext = ['PDFtext'] + e
 
-np.savetxt('PDFtexts_Liste_IQWIG_link_date6.csv', [p for p in zip(source, PDFlink, pubdate, PDFtext)], delimiter='&', fmt='%s')
+np.savetxt('PDFtexts_Liste_IQWIG_link_date.csv', [p for p in zip(source, PDFlink, pubdate, map(add_quotations, PDFtext))], delimiter=',', fmt='%s', encoding="utf-8")
 ```
-Excel-Import mit Delimiter '&'. PDF-Texte in CSV unvollstaendig. Eine Vermutung ist, dass Excel die Texte in der Darstellung aus Performane-Gründen kürzt.
 
 
 <br/>
@@ -318,7 +323,14 @@ for text in x:
     y = requests.post("https://api.deepai.org/api/summarization", data={'text': text}, headers={'api-key': '>>INSERT YOUR OWN API-KEY FROM DEEPAI.ORG<<'})
     m.append(y.json())
 print(m)
-summary = ['HTML_Summary'] + m
+
+def summary_wrap(dict):
+    if "output" in dict:
+        return add_quotations(dict["output"])
+    else:
+        return ("no summary")
+   
+summary = ['"HTML_Summary"'] + list(map(summary_wrap, m))
 ```
 <br/>
 Wer testweise erstmal ein paar Anfragen an die DeepAI-API schicken möchte, um das Verfahren zu testen, kann folgenden Key verwenden:
@@ -330,11 +342,8 @@ Wer testweise erstmal ein paar Anfragen an die DeepAI-API schicken möchte, um d
 
 ## Zwischenteil 7.1 | Ergebnisse als CSV speichern
 ```python
-np.savetxt('HTMLtexts_summary_link_pubdate_IQWIG2_delimiterUND.csv', [p for p in zip(source1, HTMLlink, pubdate1, HTMLtext, summary)], delimiter='&', fmt='%s')
-
-# Problem: Das CSV sieht an einigen Stellen kaputt aus. 
+np.savetxt('HTMLtexts_summary_link_pubdate_IQWIG.csv', [p for p in zip(source1, HTMLlink, pubdate1, map(add_quotations, HTMLtext), summary)], delimiter=',', fmt='%s', encoding="utf-8")
 ```
-Excel-Import mit Delimiter '&'.
 <br/>
 
 # TEIL 8 | Resultate zu PDF- und HTML-Texten chronologisch ordnen
@@ -384,10 +393,9 @@ print(sb)
 ```
 ## Endteil 8.2 | Sortierte Ergebnisse als CSV speichern:
 ```python
-np.savetxt('PDF_allAtributes_DateSorted_IQWIG.csv', sb, delimiter='&', fmt='%s')
-np.savetxt('HTML_allAtributes_DateSorted_IQWIG.csv', sr, delimiter='&', fmt='%s')
+np.savetxt('PDF_allAtributes_DateSorted_IQWIG.csv', sb, delimiter=',', fmt='%s', encoding="utf-8")
+np.savetxt('HTML_allAtributes_DateSorted_IQWIG.csv', map(add_quotations, sr), delimiter=',', fmt='%s', encoding="utf-8")
 ```
-Excel-Import mit Delimiter '&'.
 <br/>
 <br/>
 

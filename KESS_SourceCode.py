@@ -1,3 +1,7 @@
+# Für die Speicherung der Ergebnisse als CSV:
+def add_quotations(inp):
+    return '"' + inp.replace('"', '\'') + '"'
+
 # TEIL 2 | HTML auslesen und Texte extrahieren
 import requests
 import numpy as np
@@ -42,7 +46,7 @@ source1 = ['Source_name'] + list(np.full(len(l), 'IQWIG'))
 HTMLlink = ['HTMLlink'] + l
 pubdate1 = ['Pub_Datum'] + r
 HTMLtext = ['HTML-Text'] + x
-np.savetxt('HTMLtexts_Liste_IQWIG_link_nodate6.csv', [p for p in zip(source1, HTMLlink, pubdate1, HTMLtext)], delimiter=',', fmt='%s')
+np.savetxt('HTMLtexts_Liste_IQWIG_link_nodate.csv', [p for p in zip(source1, HTMLlink, pubdate1, map(add_quotations, HTMLtext))], delimiter=',', fmt='%s', encoding='utf-8')
 
 
 
@@ -86,7 +90,7 @@ def webCR3(WebUrl):
     source = ['Source_name'] + list(np.full(len(g), 'IQWIG'))
     PDFlink = ['PDFlink'] + g
     pubdate = ['Pub_Datum'] + b
-    np.savetxt('PDFlinks_Liste_5_IQWIG_pubdate.csv', [p for p in zip(source, PDFlink, pubdate)], delimiter=',', fmt='%s')
+    np.savetxt('PDFlinks_IQWIG_pubdate.csv', [p for p in zip(source, PDFlink, pubdate)], delimiter=',', fmt='%s', encoding='utf-8')
     return g, b
 g, b = webCR3("https://iqwig-search-api.e-spirit.cloud/v1/prepared_search/IQWIG_PS/execute?query=Prostata&page=1&rows=1000")
 
@@ -148,7 +152,7 @@ source = ['Source_name'] + list(np.full(len(g), 'IQWIG'))
 PDFlink = ['PDFlink'] + g
 pubdate = ['Pub_Datum'] + b
 PDFtext = ['PDFtext'] + e
-np.savetxt('PDFtexts_Liste_IQWIG_link_date6.csv', [p for p in zip(source, PDFlink, pubdate, PDFtext)], delimiter='&', fmt='%s')
+np.savetxt('PDFtexts_Liste_IQWIG_link_date.csv', [p for p in zip(source, PDFlink, pubdate, map(add_quotations, PDFtext))], delimiter=',', fmt='%s', encoding='utf-8')
 
 
 
@@ -247,7 +251,14 @@ for text in x:
     y = requests.post("https://api.deepai.org/api/summarization", data={'text': text}, headers={'api-key': os.environ.get("DEEPAI_KEY")})
     m.append(y.json())
 print(m)
-summary = ['HTML_Summary'] + m
+
+def summary_wrap(dict):
+    if "output" in dict:
+        return add_quotations(dict["output"])
+    else:
+        return ("no summary")
+
+summary = ['"HTML_Summary"'] + list(map(summary_wrap, m))
 
 """
 # Quickstart API-Key für alle, die DeepAI erstmal testen wollen:
@@ -255,8 +266,7 @@ summary = ['HTML_Summary'] + m
 """
 
 # Zwischenteil 7.1 | Ergebnisse als CSV speichern
-np.savetxt('HTMLtexts_summary_link_pubdate_IQWIG2_delimiterUND.csv', [p for p in zip(source1, HTMLlink, pubdate1, HTMLtext, summary)], delimiter='&', fmt='%s')
-# Problem: Das CSV sieht an einigen Stellen kaputt aus.
+np.savetxt('HTMLtexts_summary_link_pubdate_IQWIG2.csv', [p for p in zip(source1, HTMLlink, pubdate1, map(add_quotations, HTMLtext), summary)], delimiter=',', fmt='%s', encoding='utf-8')
 
 
 
@@ -279,15 +289,15 @@ for datum in b:
         print("no date")
 
 # Zwischenteil 8.1 | Tupel erstellen aus: Link, Date, SourceName, Keywords – Zusatz HTML: Text, Summary.
-OverallTupelHTML = zip(source1, HTMLlink, pubdate1, h2, HTMLtext, summary)
+OverallTupelHTML = zip(source1, HTMLlink, pubdate1, h2, map(add_quotations, HTMLtext), summary)
 OverallTupelPDF = zip(source, PDFlink, pubdate, h1) 
 
 # HTMLs chronologisch ordnen
 print("HTMLs chronologisch ordnen:")
 def unpackHTMLtuple(TupelDate):
-    return TupelDate[2]                                                                 # F: Bezieht sich eine Funktion wie unpackHTMLtuple immer auf die vorangegangene Liste? 
-sr = sorted(OverallTupelHTML, key = unpackHTMLtuple, reverse = False)                   # A: Nein. Die Funktion unpackHTMLtuple wird dort nur definiert. Ausgefuehrt wird sie erst innerhalb sorted() und dieser Funktion uebergibt man die Liste.
-print(sr)                                                                               # F: Weshalb steht in jedem Element der Liste nur ein einziges Keyword? 
+    return TupelDate[2]                                                                 
+sr = sorted(OverallTupelHTML, key = unpackHTMLtuple, reverse = False)                   
+print(sr)                                                                               
 print()
 
 # PDFs chronologisch ordnen
@@ -298,5 +308,5 @@ sb = sorted(OverallTupelPDF, key = unpackPDFtuple, reverse = False)
 print(sb)
 
 # Endteil 8.2 | Sortierte Endergebisse als CSV speichern
-np.savetxt('HTML_allAtributes_DateSorted_IQWIG.csv', sr, delimiter='&', fmt='%s')  
-np.savetxt('PDF_allAtributes_DateSorted_IQWIG.csv', sb, delimiter='&', fmt='%s')
+np.savetxt('HTML_allAtributes_DateSorted_IQWIG.csv', sr, delimiter=',', fmt='%s', encoding='utf-8')  
+np.savetxt('PDF_allAtributes_DateSorted_IQWIG.csv', sb, delimiter=',', fmt='%s', encoding='utf-8')
